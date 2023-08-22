@@ -1,0 +1,30 @@
+﻿---------------------------------------------------------------------------------------------------
+Version: 1.1.1
+Date: 2023-08-17
+  Bugfixes:
+    - Fixed crashes for saves that started without the mod
+---------------------------------------------------------------------------------------------------
+Version: 1.1.0
+Date: 2023-08-16
+  Bugfixes:
+    - Fixed functions and improved them in the remote interface
+    - Improved data reliability during mod update
+  Scripting:
+    - Added default force limit by names and types via remote interface
+---------------------------------------------------------------------------------------------------
+Version: 1.0.2
+Date: 2023-08-16
+  Changes:
+    - Ignores ghost entities at all to avoid spam lag, but it's an issue still somehow
+---------------------------------------------------------------------------------------------------
+Version: 1.0.1
+Date: 2023-08-16
+  Bugfixes:
+    - Fixed several critical bugs
+  Changes:
+    - Ignores ghost entities from blueprints to avoid spam lag
+---------------------------------------------------------------------------------------------------
+Version: 1.0.0
+Date: 2023-08-16
+  Changes:
+    - First public release
