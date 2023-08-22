@@ -1,4 +1,11 @@
 ﻿---------------------------------------------------------------------------------------------------
+Version: 1.1.2
+Date: 2023-08-22
+  Features:
+    - Added new command: /check_limited_buildings
+  Bugfixes:
+    - Recheck entities during "on_configuration_changed" event
+---------------------------------------------------------------------------------------------------
 Version: 1.1.1
 Date: 2023-08-17
   Bugfixes:

@@ -9,6 +9,7 @@
 	"description": "Scripts, admins can set max amount of entities allowed to be build by type and name for forces.",
 	"dependencies": [
 		"? zk-lib",
-		"? gvv"
+		"? gvv",
+		"? anti_blueprint_spam"
 	]
 }

@@ -1,3 +1,6 @@
+Entity_util = require("zk-lib/lualibs/control_stage/entity-util")
+
+
 local M = {}
 
 
@@ -305,7 +308,24 @@ M.remove_entity = remove_entity
 
 
 M.check_entities = function()
+	---@type LuaSurface.count_entities_filtered_param
+	local filter_param = {force = 0, type = ""}
+	for force_index, entities_by_types in pairs(force_entities_by_types) do
+		filter_param.force = force_index
+		for type_name in pairs(entities_by_types) do
+			filter_param.type = type_name
+			entities_by_types[type_name] = Entity_util.count_entities(filter_param)
+		end
+	end
 
+	filter_param.type = nil
+	for force_index, entities_by_types in pairs(force_entities_by_names) do
+		filter_param.force = force_index
+		for type_name in pairs(entities_by_types) do
+			filter_param.name = type_name
+			entities_by_types[type_name] = Entity_util.count_entities(filter_param)
+		end
+	end
 end
 
 
@@ -416,6 +436,25 @@ M.on_robot_built_entity = function(event)
 	-- game.print("+ count_by_name: " .. count_by_name)
 	entities_by_types[_type] = count_by_type
 	entities_by_names[name]  = count_by_name
+end
+
+
+---@param cmd CustomCommandData
+M.check_limited_buildings_command = function(cmd)
+	if cmd.player_index == 0 then -- command from server/rcon
+		M.check_entities()
+		print("Checked enttities in \"limited buildings\" mod")
+		return
+	end
+
+	local player = game.get_player(cmd.player_index)
+	if not (player and player.valid) then return end
+	if not player.admin then
+		player.print({"command-output.parameters-require-admin"})
+		return
+	end
+
+	M.check_entities()
 end
 
 
@@ -764,6 +803,7 @@ M.on_load = function()
 	M.handle_events()
 end
 
+
 local is_entities_checked = false
 ---@param event table
 M.on_configuration_changed = function(event)
@@ -796,6 +836,9 @@ M.events = {
 	[defines.events.on_forces_merging] = M.on_forces_merging,
 	[defines.events.on_runtime_mod_setting_changed] = M.on_runtime_mod_setting_changed,
 }
+
+
+commands.add_command("check_limited_buildings", {"limited_buildings-commands.check_limited_buildings"}, M.check_limited_buildings_command)
 
 
 return M
