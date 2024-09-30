@@ -278,14 +278,18 @@ remote.add_interface("limited_buildings", {
 })
 
 
+local _render_tick = -1
 ---@param entity LuaEntity
 ---@param max_count integer
 ---@param player LuaPlayer?
 local function remove_entity(entity, max_count, player, is_ghost)
 	_warning_locale_text[2] = max_count
 
-	if player then
-		player.create_local_flying_text(_flying_text_param)
+	if player and player.valid then
+		if game.tick ~= _render_tick then
+			player.create_local_flying_text(_flying_text_param)
+			_render_tick = game.tick
+		end
 		if is_ghost then
 			entity.destroy(DESTROY_PARAM)
 		else
@@ -464,12 +468,6 @@ M.on_built_entity = function(event)
 	if not entity.valid then return end
 	local force_index = entity.force.index
 	if forces_blacklist[force_index] then return end
-	local player = game.get_player(event.player_index)
-	if not (player and player.valid) then
-		player = nil
-	-- elseif player.is_cursor_blueprint() then
-	-- 	return
-	end
 
 	local is_removed = false
 	local _type
@@ -494,6 +492,7 @@ M.on_built_entity = function(event)
 	if limit then
 		if count_by_type > limit then
 			count_by_type = count_by_type - 1
+			local player = game.get_player(event.player_index)
 			remove_entity(entity, limit, player, is_ghost)
 			is_removed = true
 		end
@@ -501,6 +500,7 @@ M.on_built_entity = function(event)
 		limit = global_limitiations_by_types[_type]
 		if limit and count_by_type > limit then
 			count_by_type = count_by_type - 1
+			local player = game.get_player(event.player_index)
 			remove_entity(entity, limit, player, is_ghost)
 			is_removed = true
 		end
@@ -515,6 +515,7 @@ M.on_built_entity = function(event)
 		if limit then
 			if count_by_name > limit then
 				count_by_name = count_by_name - 1
+				local player = game.get_player(event.player_index)
 				remove_entity(entity, limit, player, is_ghost)
 				is_removed = true
 			end
@@ -522,6 +523,7 @@ M.on_built_entity = function(event)
 			limit = global_limitiations_by_names[_type]
 			if limit and count_by_name > limit then
 				count_by_name = count_by_name - 1
+				local player = game.get_player(event.player_index)
 				remove_entity(entity, limit, player, is_ghost)
 				is_removed = true
 			end
