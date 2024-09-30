@@ -6,7 +6,7 @@
 	"author": "ZwerOxotnik",
 	"contact": "zweroxotnik@gmail.com, Discord:ZwerOxotnik",
 	"homepage": "https://www.reddit.com/r/ZwerOxotnik/",
-	"description": "Scripts, admins can set max amount of entities allowed to be build by type and name for forces.",
+	"description": "Scripts, admins can set max amount of entities allowed to be build by type and name for forces. ",
 	"dependencies": [
 		"? zk-lib",
 		"? gvv",
