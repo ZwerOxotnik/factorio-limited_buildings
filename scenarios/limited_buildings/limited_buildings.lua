@@ -6,42 +6,42 @@ local M = {}
 
 --#region Global data
 ---@class limited_buildings_mod_data
-local mod_data
+local __mod_data
 ---@type table<string, uint>
-local global_limitiations_by_names
+local __global_limitiations_by_names
 ---@type table<string, uint>
-local global_limitiations_by_types
+local __global_limitiations_by_types
 ---@type table<uint, table<string, uint>>
-local force_limit_by_types
+local __force_limit_by_types
 ---@type table<uint, table<string, uint>>
-local force_limit_by_names
+local __force_limit_by_names
 ---@type table<uint, table<string, integer>>
-local force_entities_by_types
+local __force_entities_by_types
 ---@type table<uint, table<string, integer>>
-local force_entities_by_names
+local __force_entities_by_names
 ---@type table<uint, true>
-local forces_blacklist
+local __forces_blacklist
 ---@type table<uint, true>
-local forces_global_limit_blacklist
+local __forces_global_limit_blacklist
 --#endregion
 
 
 local ENTITY_TYPES = require("scenarios/limited_buildings/entity_types")
 local DESTROY_PARAM = {raise_destroy = true}
-local _warning_locale_text = {"limited_buildings.warning_limit", 0}
-local _flying_text_param = {
-	text = _warning_locale_text, create_at_cursor=true,
+local __warning_locale_text = {"limited_buildings.warning_limit", 0}
+local __flying_text_param = {
+	text = __warning_locale_text, create_at_cursor=true,
 	color = {1, 0, 0}, time_to_live = 210,
 	speed = 0.1
 }
 local draw_text = rendering.draw_text
-local _render_text_position = {0, 0}
-local _render_target_forces = {nil}
-local _render_text_param = {
-	text = _warning_locale_text,
-	target = _render_text_position,
+local __render_text_position = {0, 0}
+local __render_target_forces = {nil}
+local __render_text_param = {
+	text = __warning_locale_text,
+	target = __render_text_position,
 	surface = nil,
-	forces = _render_target_forces,
+	forces = __render_target_forces,
 	scale = 1,
 	time_to_live = 210,
 	color = {200, 0, 0}
@@ -55,13 +55,13 @@ remote.add_interface("limited_buildings", {
 		return mod_name
 	end,
 	get_mod_data = function() -- Please don't use because it can cause lags
-		return mod_data
+		return __mod_data
 	end,
 	set_global_limitiations_by_name = function(name, count)
-		global_limitiations_by_names[name] = count
+		__global_limitiations_by_names[name] = count
 	end,
 	set_global_limitiations_by_type = function(name, count)
-		global_limitiations_by_types[name] = count
+		__global_limitiations_by_types[name] = count
 
 		local setting_name = "LBZO_" .. name .. "_limit"
 		local setting = settings.global[setting_name]
@@ -73,109 +73,109 @@ remote.add_interface("limited_buildings", {
 	end,
 	set_force_limit_by_type = function(force_index, name, count)
 		if count == nil then
-			force_limit_by_types[force_index] = nil
+			__force_limit_by_types[force_index] = nil
 			return
 		end
 
-		local force_data = force_limit_by_types[force_index]
+		local force_data = __force_limit_by_types[force_index]
 		if force_data then
 			force_data[name] = count
 		else
-			force_limit_by_types[force_index] = {[name] = count}
+			__force_limit_by_types[force_index] = {[name] = count}
 		end
 	end,
 	set_force_limit_by_name = function(force_index, name, count)
 		if count == nil then
-			force_limit_by_names[force_index] = nil
+			__force_limit_by_names[force_index] = nil
 			return
 		end
 
-		local force_data = force_limit_by_names[force_index]
+		local force_data = __force_limit_by_names[force_index]
 		if force_data then
 			force_data[name] = count
 		else
-			force_limit_by_names[force_index] = {[name] = count}
+			__force_limit_by_names[force_index] = {[name] = count}
 		end
 	end,
 	set_force_entities_by_type = function(force_index, name, count)
 		if count == nil then
-			force_entities_by_types[force_index] = nil
+			__force_entities_by_types[force_index] = nil
 			return
 		end
 
-		local force_data = force_entities_by_types[force_index]
+		local force_data = __force_entities_by_types[force_index]
 		if force_data then
 			force_data[name] = count
 		else
-			force_entities_by_types[force_index] = {[name] = count}
+			__force_entities_by_types[force_index] = {[name] = count}
 		end
 	end,
 	set_force_entities_by_name = function(force_index, name, count)
 		if count == nil then
-			force_entities_by_names[force_index] = nil
+			__force_entities_by_names[force_index] = nil
 			return
 		end
 
-		local force_data = force_entities_by_names[force_index]
+		local force_data = __force_entities_by_names[force_index]
 		if force_data then
 			force_data[name] = count
 		else
-			force_entities_by_names[force_index] = {[name] = count}
+			__force_entities_by_names[force_index] = {[name] = count}
 		end
 	end,
 	get_global_limitiations_by_name = function(name)
-		return global_limitiations_by_names[name]
+		return __global_limitiations_by_names[name]
 	end,
 	get_global_limitiations_by_type = function(name)
-		return global_limitiations_by_types[name]
+		return __global_limitiations_by_types[name]
 	end,
 	get_force_limit_by_type = function(force_index, name)
-		local force_data = force_limit_by_types[force_index]
+		local force_data = __force_limit_by_types[force_index]
 		if force_data then
 			return force_data[name]
 		end
 	end,
 	get_force_limit_by_name = function(force_index, name)
-		local force_data = force_limit_by_names[force_index]
+		local force_data = __force_limit_by_names[force_index]
 		if force_data then
 			return force_data[name]
 		end
 	end,
 	get_force_entities_by_type = function(force_index, name)
-		local force_data = force_entities_by_types[force_index]
+		local force_data = __force_entities_by_types[force_index]
 		if force_data then
 			return force_data[name]
 		end
 	end,
 	get_force_entities_by_name = function(force_index, name)
-		local force_data = force_entities_by_names[force_index]
+		local force_data = __force_entities_by_names[force_index]
 		if force_data then
 			return force_data[name]
 		end
 	end,
 	get_force_limit_by_types_data = function(force_index)
-		return force_limit_by_types[force_index]
+		return __force_limit_by_types[force_index]
 	end,
 	get_force_limit_by_names_data = function(force_index)
-		return force_limit_by_names[force_index]
+		return __force_limit_by_names[force_index]
 	end,
 	get_force_entities_by_types_data = function(force_index)
-		return force_entities_by_types[force_index]
+		return __force_entities_by_types[force_index]
 	end,
 	get_force_entities_by_name_data = function(force_index)
-		return force_entities_by_names[force_index]
+		return __force_entities_by_names[force_index]
 	end,
 	add_global_limitiations_by_name = function(name, count)
-		local result = (global_limitiations_by_names[name] or 0) + count
-		global_limitiations_by_names[name] = result
+		local result = (__global_limitiations_by_names[name] or 0) + count
+		__global_limitiations_by_names[name] = result
 	end,
 	add_global_limitiations_by_type = function(name, count)
-		local result = (global_limitiations_by_types[name] or 0) + count
+		local result = (__global_limitiations_by_types[name] or 0) + count
 		if result < 0 then
-			global_limitiations_by_types[name] = nil
+			__global_limitiations_by_types[name] = nil
 			result = nil
 		else
-			global_limitiations_by_types[name] = result
+			__global_limitiations_by_types[name] = result
 		end
 
 		local setting_name = "LBZO_" .. name .. "_limit"
@@ -187,7 +187,7 @@ remote.add_interface("limited_buildings", {
 		end
 	end,
 	add_force_limit_by_type = function(force_index, name, count)
-		local force_data = force_limit_by_types[force_index]
+		local force_data = __force_limit_by_types[force_index]
 		if force_data then
 			local result = force_data[name] + count
 			if result >= 0 then
@@ -196,11 +196,11 @@ remote.add_interface("limited_buildings", {
 				force_data[name] = nil
 			end
 		elseif count > 0 then
-			force_limit_by_types[force_index] = {[name] = count}
+			__force_limit_by_types[force_index] = {[name] = count}
 		end
 	end,
 	add_force_limit_by_name = function(force_index, name, count)
-		local force_data = force_limit_by_names[force_index]
+		local force_data = __force_limit_by_names[force_index]
 		if force_data then
 			local result = force_data[name] + count
 			if result >= 0 then
@@ -209,70 +209,70 @@ remote.add_interface("limited_buildings", {
 				force_data[name] = nil
 			end
 		elseif count > 0 then
-			force_limit_by_names[force_index] = {[name] = count}
+			__force_limit_by_names[force_index] = {[name] = count}
 		end
 	end,
 	add_force_entities_by_type = function(force_index, name, count)
-		local force_data = force_entities_by_types[force_index]
+		local force_data = __force_entities_by_types[force_index]
 		if force_data then
 			force_data[name] = force_data[name] + count
 		elseif count > 0 then
-			force_entities_by_types[force_index] = {[name] = count}
+			__force_entities_by_types[force_index] = {[name] = count}
 		end
 	end,
 	add_force_entities_by_name = function(force_index, name, count)
-		local force_data = force_entities_by_names[force_index]
+		local force_data = __force_entities_by_names[force_index]
 		if force_data then
 			force_data[name] = force_data[name] + count
 		elseif count > 0 then
-			force_entities_by_names[force_index] = {[name] = count}
+			__force_entities_by_names[force_index] = {[name] = count}
 		end
 	end,
 	add_force_to_blacklist = function(force_index)
-		forces_blacklist[force_index] = true
-		force_limit_by_types[force_index] = nil
-		force_limit_by_names[force_index] = nil
-		force_entities_by_types[force_index] = nil
-		force_entities_by_names[force_index] = nil
+		__forces_blacklist[force_index] = true
+		__force_limit_by_types[force_index] = nil
+		__force_limit_by_names[force_index] = nil
+		__force_entities_by_types[force_index] = nil
+		__force_entities_by_names[force_index] = nil
 	end,
 	remove_force_from_blacklist = function(force_index)
-		forces_blacklist[force_index] = nil
+		__forces_blacklist[force_index] = nil
 		M.init_force(force_index)
 	end,
 	add_force_to_global_limit_blacklist = function(force_index)
-		forces_global_limit_blacklist[force_index] = true
+		__forces_global_limit_blacklist[force_index] = true
 	end,
 	remove_force_from_global_limit_blacklist = function(force_index)
-		forces_global_limit_blacklist[force_index] = nil
+		__forces_global_limit_blacklist[force_index] = nil
 	end,
 	set_default_force_limit_by_type = function(name, count)
-		mod_data.default_force_limit_by_types[name] = count
+		__mod_data.default_force_limit_by_types[name] = count
 	end,
 	set_default_force_limit_by_name = function(name, count)
-		mod_data.default_force_limit_by_names[name] = count
+		__mod_data.default_force_limit_by_names[name] = count
 	end,
 	get_default_force_limit_by_type = function(name)
-		return mod_data.default_force_limit_by_types[name]
+		return __mod_data.default_force_limit_by_types[name]
 	end,
 	get_default_force_limit_by_name = function(name)
-		return mod_data.default_force_limit_by_names[name]
+		return __mod_data.default_force_limit_by_names[name]
 	end,
 	add_default_force_limit_by_type = function(name, count)
-		local init_count = mod_data.default_force_limit_by_types[name]
+		local init_count = __mod_data.default_force_limit_by_types[name]
 		local result = (init_count or 0) + count
 		if result < 0 then
-			mod_data.default_force_limit_by_types[name] = nil
+			__mod_data.default_force_limit_by_types[name] = nil
 		else
-			mod_data.default_force_limit_by_types[name] = result
+			__mod_data.default_force_limit_by_types[name] = result
 		end
 	end,
 	add_default_force_limit_by_name = function(name, count)
-		local init_count = mod_data.default_force_limit_by_names[name]
+		local init_count = __mod_data.default_force_limit_by_names[name]
 		local result = (init_count or 0) + count
 		if result < 0 then
-			mod_data.default_force_limit_by_names[name] = nil
+			__mod_data.default_force_limit_by_names[name] = nil
 		else
-			mod_data.default_force_limit_by_names[name] = result
+			__mod_data.default_force_limit_by_names[name] = result
 		end
 	end,
 })
@@ -283,11 +283,11 @@ local _render_tick = -1
 ---@param max_count integer
 ---@param player LuaPlayer?
 local function remove_entity(entity, max_count, player, is_ghost)
-	_warning_locale_text[2] = max_count
+	__warning_locale_text[2] = max_count
 
 	if player and player.valid then
 		if game.tick ~= _render_tick then
-			player.create_local_flying_text(_flying_text_param)
+			player.create_local_flying_text(__flying_text_param)
 			_render_tick = game.tick
 		end
 		if is_ghost then
@@ -299,12 +299,12 @@ local function remove_entity(entity, max_count, player, is_ghost)
 	end
 
 	-- Show warning text
-	_render_target_forces[1] = entity.force
-	_render_text_param.surface = entity.surface
+	__render_target_forces[1] = entity.force
+	__render_text_param.surface = entity.surface
 	local ent_pos = entity.position
-	_render_text_position[1] = ent_pos.x
-	_render_text_position[2] = ent_pos.y
-	draw_text(_render_text_param)
+	__render_text_position[1] = ent_pos.x
+	__render_text_position[2] = ent_pos.y
+	draw_text(__render_text_param)
 
 	entity.destroy(DESTROY_PARAM)
 end
@@ -314,7 +314,7 @@ M.remove_entity = remove_entity
 M.check_entities = function()
 	---@type LuaSurface.count_entities_filtered_param
 	local filter_param = {force = 0, type = ""}
-	for force_index, entities_by_types in pairs(force_entities_by_types) do
+	for force_index, entities_by_types in pairs(__force_entities_by_types) do
 		filter_param.force = force_index
 		for type_name in pairs(entities_by_types) do
 			filter_param.type = type_name
@@ -323,7 +323,7 @@ M.check_entities = function()
 	end
 
 	filter_param.type = nil
-	for force_index, entities_by_types in pairs(force_entities_by_names) do
+	for force_index, entities_by_types in pairs(__force_entities_by_names) do
 		filter_param.force = force_index
 		for type_name in pairs(entities_by_types) do
 			filter_param.name = type_name
@@ -335,23 +335,23 @@ end
 
 ---@param force_index uint
 M.init_force = function(force_index)
-	if forces_blacklist[force_index] then return end
+	if __forces_blacklist[force_index] then return end
 
-	force_limit_by_types[force_index] = force_limit_by_types[force_index] or {}
-	force_limit_by_names[force_index] = force_limit_by_names[force_index] or {}
-	force_entities_by_types[force_index] = force_entities_by_types[force_index] or {}
-	force_entities_by_names[force_index] = force_entities_by_names[force_index] or {}
+	__force_limit_by_types[force_index] = __force_limit_by_types[force_index] or {}
+	__force_limit_by_names[force_index] = __force_limit_by_names[force_index] or {}
+	__force_entities_by_types[force_index] = __force_entities_by_types[force_index] or {}
+	__force_entities_by_names[force_index] = __force_entities_by_names[force_index] or {}
 
-	local force_data = force_limit_by_types[force_index]
-	for type_name, max_count in pairs(mod_data.default_force_limit_by_types) do
+	local force_data = __force_limit_by_types[force_index]
+	for type_name, max_count in pairs(__mod_data.default_force_limit_by_types) do
 		force_data[type_name] = max_count
 	end
-	force_data = force_limit_by_names[force_index]
-	for type_name, max_count in pairs(mod_data.default_force_limit_by_names) do
+	force_data = __force_limit_by_names[force_index]
+	for type_name, max_count in pairs(__mod_data.default_force_limit_by_names) do
 		force_data[type_name] = max_count
 	end
 
-	local force_data = force_entities_by_types[force_index]
+	local force_data = __force_entities_by_types[force_index]
 	for _, type_name in ipairs(ENTITY_TYPES) do
 		force_data[type_name] = force_data[type_name] or 0
 	end
@@ -363,10 +363,10 @@ M.on_entity_died = function(event)
 	local entity = event.entity
 	if not entity.valid then return end
 	local force_index = entity.force.index
-	if forces_blacklist[force_index] then return end
+	if __forces_blacklist[force_index] then return end
 
 	local _type = entity.type
-	local force_data = force_entities_by_types[force_index]
+	local force_data = __force_entities_by_types[force_index]
 	local count_by_types = force_data[_type]
 	if count_by_types then
 		force_data[_type] = count_by_types - 1
@@ -374,7 +374,7 @@ M.on_entity_died = function(event)
 	-- game.print("- count_by_types: " .. (force_data[_type] or "nil"))
 
 	local name = entity.name
-	force_data = force_entities_by_names[force_index]
+	force_data = __force_entities_by_names[force_index]
 	local count_by_names = force_data[name]
 	if count_by_names then
 		force_data[name] = count_by_names - 1
@@ -385,19 +385,19 @@ end
 
 ---@param event on_robot_built_entity | script_raised_built
 M.on_robot_built_entity = function(event)
-	local entity = event.created_entity or event.entity
+	local entity = event.entity or event.entity
 	if not entity.valid then return end
-	if forces_blacklist[entity.force.index] then return end
+	if __forces_blacklist[entity.force.index] then return end
 
 	local is_removed = false
 	local force_index = entity.force.index
 	local _type = entity.type
 	local name = entity.name
 
-	local entities_by_types = force_entities_by_types[force_index]
+	local entities_by_types = __force_entities_by_types[force_index]
 	local count_by_type = entities_by_types[_type] or 0
 	count_by_type = count_by_type + 1
-	local limit_force_data = force_limit_by_types[force_index]
+	local limit_force_data = __force_limit_by_types[force_index]
 	local limit = limit_force_data[_type]
 	if limit then
 		if count_by_type > limit then
@@ -405,8 +405,8 @@ M.on_robot_built_entity = function(event)
 			remove_entity(entity, limit, player, is_ghost)
 			is_removed = true
 		end
-	elseif not forces_global_limit_blacklist[force_index] then
-		limit = global_limitiations_by_types[_type]
+	elseif not __forces_global_limit_blacklist[force_index] then
+		limit = __global_limitiations_by_types[_type]
 		if limit and count_by_type > limit then
 			count_by_type = count_by_type - 1
 			remove_entity(entity, limit, player, is_ghost)
@@ -414,11 +414,11 @@ M.on_robot_built_entity = function(event)
 		end
 	end
 
-	local entities_by_names = force_entities_by_names[force_index]
+	local entities_by_names = __force_entities_by_names[force_index]
 	local count_by_name = entities_by_names[name] or 0
 	count_by_name = count_by_name + 1
 	if not is_removed then
-		local limit_force_data = force_limit_by_names[force_index]
+		local limit_force_data = __force_limit_by_names[force_index]
 		local limit = limit_force_data[_type]
 		if limit then
 			if count_by_name > limit then
@@ -426,8 +426,8 @@ M.on_robot_built_entity = function(event)
 				remove_entity(entity, limit, player, is_ghost)
 				is_removed = true
 			end
-		elseif not forces_global_limit_blacklist[force_index] then
-			limit = global_limitiations_by_names[_type]
+		elseif not __forces_global_limit_blacklist[force_index] then
+			limit = __global_limitiations_by_names[_type]
 			if limit and count_by_name > limit then
 				count_by_name = count_by_name - 1
 				remove_entity(entity, limit, player, is_ghost)
@@ -464,10 +464,10 @@ end
 
 ---@param event on_built_entity
 M.on_built_entity = function(event)
-	local entity = event.created_entity
+	local entity = event.entity
 	if not entity.valid then return end
 	local force_index = entity.force.index
-	if forces_blacklist[force_index] then return end
+	if __forces_blacklist[force_index] then return end
 
 	local is_removed = false
 	local _type
@@ -484,10 +484,10 @@ M.on_built_entity = function(event)
 		name = entity.name
 	end
 
-	local entities_by_types = force_entities_by_types[force_index]
+	local entities_by_types = __force_entities_by_types[force_index]
 	local count_by_type = entities_by_types[_type] or 0
 	count_by_type = count_by_type + 1
-	local limit_force_data = force_limit_by_types[force_index]
+	local limit_force_data = __force_limit_by_types[force_index]
 	local limit = limit_force_data[_type]
 	if limit then
 		if count_by_type > limit then
@@ -496,8 +496,8 @@ M.on_built_entity = function(event)
 			remove_entity(entity, limit, player, is_ghost)
 			is_removed = true
 		end
-	elseif not forces_global_limit_blacklist[force_index] then
-		limit = global_limitiations_by_types[_type]
+	elseif not __forces_global_limit_blacklist[force_index] then
+		limit = __global_limitiations_by_types[_type]
 		if limit and count_by_type > limit then
 			count_by_type = count_by_type - 1
 			local player = game.get_player(event.player_index)
@@ -506,11 +506,11 @@ M.on_built_entity = function(event)
 		end
 	end
 
-	local entities_by_names = force_entities_by_names[force_index]
+	local entities_by_names = __force_entities_by_names[force_index]
 	local count_by_name = entities_by_names[name] or 0
 	count_by_name = count_by_name + 1
 	if not is_removed then
-		local limit_force_data = force_limit_by_names[force_index]
+		local limit_force_data = __force_limit_by_names[force_index]
 		local limit = limit_force_data[_type]
 		if limit then
 			if count_by_name > limit then
@@ -519,8 +519,8 @@ M.on_built_entity = function(event)
 				remove_entity(entity, limit, player, is_ghost)
 				is_removed = true
 			end
-		elseif not forces_global_limit_blacklist[force_index] then
-			limit = global_limitiations_by_names[_type]
+		elseif not __forces_global_limit_blacklist[force_index] then
+			limit = __global_limitiations_by_names[_type]
 			if limit and count_by_name > limit then
 				count_by_name = count_by_name - 1
 				local player = game.get_player(event.player_index)
@@ -543,18 +543,18 @@ end
 M.script_raised_built = function(event)
 	local entity = event.entity or event.destination
 	if not entity.valid then return end
-	if forces_blacklist[entity.force.index] then return end
+	if __forces_blacklist[entity.force.index] then return end
 
 	local _type = entity.type
-	local count_by_types = force_entities_by_types[_type]
+	local count_by_types = __force_entities_by_types[_type]
 	if count_by_types then
-		force_entities_by_types[_type] = count_by_types + 1
+		__force_entities_by_types[_type] = count_by_types + 1
 	end
 
 	local name = entity.name
-	local count_by_names = force_entities_by_names[name]
+	local count_by_names = __force_entities_by_names[name]
 	if count_by_names then
-		force_entities_by_names[name] = count_by_names + 1
+		__force_entities_by_names[name] = count_by_names + 1
 	end
 end
 
@@ -572,30 +572,30 @@ M.on_forces_merging = function(event)
 	local source = event.source
 	if not source.valid then return end
 	local source_id = source.index
-	if forces_blacklist[source_id] then return end
+	if __forces_blacklist[source_id] then return end
 
 	local destination = event.destination
-	if not destination.valid and not forces_blacklist[destination.index] then
+	if not destination.valid and not __forces_blacklist[destination.index] then
 		local destination_id = destination.index
 
 		-- Merge entitites count
-		local source_force_data = force_entities_by_types[source_id]
-		local destination_force_data = force_entities_by_types[destination_id]
+		local source_force_data = __force_entities_by_types[source_id]
+		local destination_force_data = __force_entities_by_types[destination_id]
 		for k, count in pairs(source_force_data) do
 			destination_force_data[k] = (destination_force_data[k] or 0) + count
 		end
-		source_force_data = force_entities_by_names[source_id]
-		destination_force_data = force_entities_by_names[destination_id]
+		source_force_data = __force_entities_by_names[source_id]
+		destination_force_data = __force_entities_by_names[destination_id]
 		for k, count in pairs(source_force_data) do
 			destination_force_data[k] = (destination_force_data[k] or 0) + count
 		end
 	end
 
 	-- Delete source force data
-	force_limit_by_types[source_id] = nil
-	force_limit_by_names[source_id] = nil
-	force_entities_by_types[source_id] = nil
-	force_entities_by_names[source_id] = nil
+	__force_limit_by_types[source_id] = nil
+	__force_limit_by_names[source_id] = nil
+	__force_entities_by_types[source_id] = nil
+	__force_entities_by_names[source_id] = nil
 end
 
 
@@ -609,9 +609,9 @@ M.on_runtime_mod_setting_changed = function(event)
 	local value = settings.global[setting_name].value
 	---@cast value uint
 	if value < 0 then
-		global_limitiations_by_types[type_name] = nil
+		__global_limitiations_by_types[type_name] = nil
 	else
-		global_limitiations_by_types[type_name] = value
+		__global_limitiations_by_types[type_name] = value
 	end
 end
 
@@ -619,60 +619,60 @@ end
 
 M.validate_global_data = function()
 	local forces = game.forces
-	local entity_prototypes = game.entity_prototypes
+	local entity_prototypes = prototypes.entity
 
-	for force_id in pairs(forces_blacklist) do
+	for force_id in pairs(__forces_blacklist) do
 		if forces[force_id] == nil then
-			forces_blacklist[force_id] = nil
-			force_limit_by_types[force_id] = nil
-			force_limit_by_names[force_id] = nil
-			force_entities_by_types[force_id] = nil
-			force_entities_by_names[force_id] = nil
+			__forces_blacklist[force_id] = nil
+			__force_limit_by_types[force_id] = nil
+			__force_limit_by_names[force_id] = nil
+			__force_entities_by_types[force_id] = nil
+			__force_entities_by_names[force_id] = nil
 		end
 	end
 
-	for entity_name in pairs(global_limitiations_by_names) do
+	for entity_name in pairs(__global_limitiations_by_names) do
 		if entity_prototypes[entity_name] == nil then
-			global_limitiations_by_names[entity_name] = nil
+			__global_limitiations_by_names[entity_name] = nil
 		end
 	end
 
-	for entity_name in pairs(mod_data.default_force_limit_by_types) do
+	for entity_name in pairs(__mod_data.default_force_limit_by_types) do
 		if entity_prototypes[entity_name] == nil then
-			mod_data.default_force_limit_by_types[entity_name] = nil
+			__mod_data.default_force_limit_by_types[entity_name] = nil
 		end
 	end
 
-	for entity_name in pairs(mod_data.default_force_limit_by_names) do
+	for entity_name in pairs(__mod_data.default_force_limit_by_names) do
 		if entity_prototypes[entity_name] == nil then
-			mod_data.default_force_limit_by_names[entity_name] = nil
+			__mod_data.default_force_limit_by_names[entity_name] = nil
 		end
 	end
 
-	for force_id in pairs(force_limit_by_types) do
+	for force_id in pairs(__force_limit_by_types) do
 		if forces[force_id] == nil then
-			force_limit_by_types[force_id] = nil
-			force_limit_by_names[force_id] = nil
-			force_entities_by_types[force_id] = nil
-			force_entities_by_names[force_id] = nil
+			__force_limit_by_types[force_id] = nil
+			__force_limit_by_names[force_id] = nil
+			__force_entities_by_types[force_id] = nil
+			__force_entities_by_names[force_id] = nil
 		end
 	end
 
-	for force_id in pairs(force_entities_by_types) do
+	for force_id in pairs(__force_entities_by_types) do
 		if forces[force_id] == nil then
-			force_limit_by_types[force_id] = nil
-			force_limit_by_names[force_id] = nil
-			force_entities_by_types[force_id] = nil
-			force_entities_by_names[force_id] = nil
+			__force_limit_by_types[force_id] = nil
+			__force_limit_by_names[force_id] = nil
+			__force_entities_by_types[force_id] = nil
+			__force_entities_by_names[force_id] = nil
 		end
 	end
 
-	for force_id, data in pairs(force_limit_by_names) do
+	for force_id, data in pairs(__force_limit_by_names) do
 		if forces[force_id] == nil then
-			force_limit_by_types[force_id] = nil
-			force_limit_by_names[force_id] = nil
-			force_entities_by_types[force_id] = nil
-			force_entities_by_names[force_id] = nil
+			__force_limit_by_types[force_id] = nil
+			__force_limit_by_names[force_id] = nil
+			__force_entities_by_types[force_id] = nil
+			__force_entities_by_names[force_id] = nil
 			goto continue
 		end
 		for entity_name in pairs(data) do
@@ -683,12 +683,12 @@ M.validate_global_data = function()
 	    ::continue::
 	end
 
-	for force_id, data in pairs(force_entities_by_names) do
+	for force_id, data in pairs(__force_entities_by_names) do
 		if forces[force_id] == nil then
-			force_limit_by_types[force_id] = nil
-			force_limit_by_names[force_id] = nil
-			force_entities_by_types[force_id] = nil
-			force_entities_by_names[force_id] = nil
+			__force_limit_by_types[force_id] = nil
+			__force_limit_by_names[force_id] = nil
+			__force_entities_by_types[force_id] = nil
+			__force_entities_by_names[force_id] = nil
 			goto continue
 		end
 		for entity_name in pairs(data) do
@@ -700,7 +700,7 @@ M.validate_global_data = function()
 	end
 
 	for _, force in pairs(forces) do
-		if force.valid and not forces_blacklist[force.index] and force_entities_by_types[force.index] == nil then
+		if force.valid and not __forces_blacklist[force.index] and __force_entities_by_types[force.index] == nil then
 			M.init_force(force.index)
 		end
 	end
@@ -713,48 +713,48 @@ M.check_settings = function()
 		local value = settings.global["LBZO_" .. type_name .. "_limit"].value
 		---@cast value uint
 		if value == -1 then
-			global_limitiations_by_types[type_name] = nil
+			__global_limitiations_by_types[type_name] = nil
 		else
-			global_limitiations_by_types[type_name] = value
+			__global_limitiations_by_types[type_name] = value
 		end
 	end
 end
 
 M.link_data = function()
-    mod_data = global.LBZO
-	global_limitiations_by_names = mod_data.global_limitiations_by_names
-	global_limitiations_by_types = mod_data.global_limitiations_by_types
-	force_limit_by_types = mod_data.force_limit_by_types
-	force_limit_by_names = mod_data.force_limit_by_names
-	force_entities_by_types = mod_data.entities_by_types
-	force_entities_by_names = mod_data.entities_by_names
-	forces_global_limit_blacklist = mod_data.forces_global_limit_blacklist
-	forces_blacklist = mod_data.forces_blacklist
+    __mod_data = storage.LBZO
+	__global_limitiations_by_names = __mod_data.global_limitiations_by_names
+	__global_limitiations_by_types = __mod_data.global_limitiations_by_types
+	__force_limit_by_types = __mod_data.force_limit_by_types
+	__force_limit_by_names = __mod_data.force_limit_by_names
+	__force_entities_by_types = __mod_data.entities_by_types
+	__force_entities_by_names = __mod_data.entities_by_names
+	__forces_global_limit_blacklist = __mod_data.forces_global_limit_blacklist
+	__forces_blacklist = __mod_data.forces_blacklist
 end
 
 
 M.update_global_data = function()
-    global.LBZO = global.LBZO or {}
-    mod_data = global.LBZO
+    storage.LBZO = storage.LBZO or {}
+    __mod_data = storage.LBZO
 
-	mod_data.global_limitiations_by_names = mod_data.global_limitiations_by_names or {}
-	mod_data.global_limitiations_by_types = mod_data.global_limitiations_by_types or {}
-	mod_data.force_limit_by_types = mod_data.force_limit_by_types or {}
-	mod_data.force_limit_by_names = mod_data.force_limit_by_names or {}
-	mod_data.entities_by_types = mod_data.entities_by_types or {}
-	mod_data.entities_by_names = mod_data.entities_by_names or {}
+	__mod_data.global_limitiations_by_names = __mod_data.global_limitiations_by_names or {}
+	__mod_data.global_limitiations_by_types = __mod_data.global_limitiations_by_types or {}
+	__mod_data.force_limit_by_types = __mod_data.force_limit_by_types or {}
+	__mod_data.force_limit_by_names = __mod_data.force_limit_by_names or {}
+	__mod_data.entities_by_types = __mod_data.entities_by_types or {}
+	__mod_data.entities_by_names = __mod_data.entities_by_names or {}
 	---@type table<string, uint>
-	mod_data.default_force_limit_by_types = mod_data.default_force_limit_by_types or {}
+	__mod_data.default_force_limit_by_types = __mod_data.default_force_limit_by_types or {}
 	---@type table<string, uint>
-	mod_data.default_force_limit_by_names = mod_data.default_force_limit_by_names or {}
-	mod_data.forces_global_limit_blacklist = mod_data.forces_global_limit_blacklist or {}
-	if mod_data.forces_blacklist == nil then
-		mod_data.forces_blacklist = {[2] = true, [3] = true}
+	__mod_data.default_force_limit_by_names = __mod_data.default_force_limit_by_names or {}
+	__mod_data.forces_global_limit_blacklist = __mod_data.forces_global_limit_blacklist or {}
+	if __mod_data.forces_blacklist == nil then
+		__mod_data.forces_blacklist = {[2] = true, [3] = true}
 	end
 
     M.link_data()
 
-	for _, force_data in pairs(force_entities_by_types) do
+	for _, force_data in pairs(__force_entities_by_types) do
 		for _, type_name in ipairs(ENTITY_TYPES) do
 			force_data[type_name] = force_data[type_name] or {}
 		end
